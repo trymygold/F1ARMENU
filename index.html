@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR Dining Menu</title>
+    <title>Neon Dining AR - Menu</title>
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     
@@ -20,15 +20,17 @@
             background-color: var(--bg-dark);
             color: white;
             font-family: 'Rajdhani', sans-serif;
+            overflow-x: hidden;
         }
 
         header {
             text-align: center;
-            padding: 40px 20px;
+            padding: 50px 20px;
             background: radial-gradient(circle at center, #1a1a1a 0%, #050505 100%);
+            border-bottom: 1px solid #222;
         }
 
-        h1 { font-family: 'Orbitron', sans-serif; letter-spacing: 4px; color: var(--neon-blue); margin: 0; }
+        h1 { font-family: 'Orbitron', sans-serif; letter-spacing: 5px; color: var(--neon-blue); margin: 0; }
 
         .menu-grid {
             display: grid;
@@ -44,35 +46,40 @@
             border: 1px solid #333;
             border-radius: 20px;
             overflow: hidden;
-            transition: 0.3s;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .dish-card:hover { border-color: var(--neon-blue); transform: translateY(-5px); }
+        .dish-card:hover { border-color: var(--neon-blue); transform: translateY(-8px); box-shadow: 0 10px 20px rgba(0, 243, 255, 0.1); }
 
-        .dish-info { padding: 20px; }
-        .dish-name { font-size: 1.5rem; font-weight: 700; margin-bottom: 10px; }
+        .dish-info { padding: 25px; }
+        .dish-name { font-size: 1.6rem; font-weight: 700; margin-bottom: 8px; font-family: 'Orbitron', sans-serif; }
+        .price { color: var(--neon-purple); font-size: 1.2rem; margin-bottom: 20px; display: block; }
+        
         .ar-btn {
             width: 100%;
             background: transparent;
             border: 1px solid var(--neon-blue);
             color: var(--neon-blue);
-            padding: 12px;
-            border-radius: 10px;
+            padding: 14px;
+            border-radius: 12px;
             cursor: pointer;
             font-family: 'Orbitron', sans-serif;
             font-size: 0.9rem;
+            transition: 0.3s;
         }
 
-        /* --- AR OVERLAY --- */
+        .ar-btn:hover { background: var(--neon-blue); color: black; }
+
+        /* --- AR OVERLAY PANEL --- */
         #ar-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.95);
+            background: rgba(0,0,0,0.98);
             display: none;
-            z-index: 1000;
+            z-index: 9999;
             flex-direction: column;
         }
 
@@ -83,32 +90,38 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background: rgba(255,255,255,0.05);
         }
 
-        .close-btn { background: none; border: none; color: white; font-size: 2rem; cursor: pointer; }
+        .close-btn { background: none; border: none; color: white; font-size: 2.5rem; cursor: pointer; padding: 0 15px; }
 
+        /* --- THE VIEWER --- */
         model-viewer {
             width: 100%;
             flex-grow: 1;
-            background-color: #1a1a1a;
+            background-color: #0f0f0f;
+            /* Prevents page scroll while interacting with model */
+            touch-action: pan-y; 
         }
 
-        /* The specific AR button design from your Set 1 card */
+        /* The Custom AR Button (only visible on mobile) */
         #ar-button {
             background-color: white;
-            border-radius: 4px;
+            border-radius: 8px;
             border: none;
             position: absolute;
-            bottom: 16px;
-            right: 16px;
-            padding: 10px 20px;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 30px;
             font-weight: bold;
             color: black;
-            font-family: sans-serif;
+            font-family: 'Orbitron', sans-serif;
             display: flex;
             align-items: center;
-            gap: 5px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            gap: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+            white-space: nowrap;
         }
     </style>
 </head>
@@ -116,14 +129,14 @@
 
     <header>
         <h1>NEON DINING AR</h1>
-        <p>Experience your meal before it arrives</p>
+        <p>Future Vision Solutions</p>
     </header>
 
     <div class="menu-grid" id="menu-grid"></div>
 
     <div id="ar-overlay">
         <div class="overlay-header">
-            <h2 id="ar-dish-title">Dish Name</h2>
+            <h2 id="ar-dish-title" style="margin:0; font-family:'Orbitron';">Item Name</h2>
             <button class="close-btn" onclick="closeAR()">×</button>
         </div>
         
@@ -133,13 +146,16 @@
             ios-src=""
             ar
             ar-modes="webxr scene-viewer quick-look"
+            ar-scale="auto"
             camera-controls
             auto-rotate
-            shadow-intensity="1"
-            touch-action="pan-y">
+            shadow-intensity="1.5"
+            shadow-softness="1"
+            environment-image="neutral"
+            exposure="1.2">
             
             <button slot="ar-button" id="ar-button">
-                👋 VIEW IN YOUR SPACE
+                👋 PLACE IN YOUR SPACE
             </button>
         </model-viewer>
     </div>
@@ -150,14 +166,14 @@
                 id: 1,
                 name: "Neon Burger",
                 price: "$12.99",
-                model: "my-logo.gltf", // From Set 1
+                model: "my-logo.gltf", // Using file from Set 1
                 ios: "https://modelviewer.dev/shared-assets/models/Astronaut.usdz"
             },
             {
                 id: 2,
                 name: "Cyber Dish",
                 price: "$18.50",
-                model: "dish 2.glb", // From Set 2
+                model: "dish 2.glb", // Using file from Set 2
                 ios: "https://modelviewer.dev/shared-assets/models/Astronaut.usdz"
             }
         ];
@@ -167,14 +183,15 @@
         const viewer = document.getElementById('main-model-viewer');
         const arTitle = document.getElementById('ar-dish-title');
 
+        // Render Menu Cards
         dishes.forEach(dish => {
             const card = document.createElement('div');
             card.className = 'dish-card';
             card.innerHTML = `
                 <div class="dish-info">
                     <div class="dish-name">${dish.name}</div>
-                    <div style="color: var(--neon-purple); margin-bottom: 15px;">${dish.price}</div>
-                    <button class="ar-btn" onclick="openAR(${dish.id})">🧊 AR VIEW</button>
+                    <span class="price">${dish.price}</span>
+                    <button class="ar-btn" onclick="openAR(${dish.id})">🧊 AR EXPERIENCE</button>
                 </div>
             `;
             menuGrid.appendChild(card);
@@ -183,13 +200,20 @@
         function openAR(id) {
             const dish = dishes.find(d => d.id === id);
             arTitle.innerText = dish.name;
+            
+            // Set paths
             viewer.src = dish.model; 
             viewer.iosSrc = dish.ios;
+            
             overlay.classList.add('active');
+            
+            // Log for debugging
+            console.log("Loading model:", dish.model);
         }
 
         function closeAR() {
             overlay.classList.remove('active');
+            // Reset source to clear memory when closed
             viewer.src = "";
         }
     </script>
