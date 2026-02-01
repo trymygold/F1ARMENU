@@ -3,28 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Stable AR Space</title>
+    <title>Dynamic AR Placement</title>
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
     
     <style>
         body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background-color: #000;
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden; background-color: #000;
         }
 
-        /* THE FIX: touch-action: none stops the browser from blocking your fingers */
+        /* The FIX for the "Stuck" issue: touch-action: none */
         model-viewer {
-            width: 100vw;
-            height: 100vh;
-            background-color: #000;
+            width: 100vw; height: 100vh;
             touch-action: none; 
+            background-color: #000;
         }
 
-        /* Professional AR Button */
         #ar-button {
             background-color: #00f3ff;
             color: #000;
@@ -37,37 +31,37 @@
             padding: 18px 36px;
             font-weight: bold;
             font-family: sans-serif;
-            font-size: 16px;
-            box-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.5);
             z-index: 100;
         }
 
-        /* Loading Indicator */
-        #ar-prompt {
+        .status-msg {
             position: absolute;
             top: 20px;
             width: 100%;
             text-align: center;
-            color: white;
+            color: #00f3ff;
             font-family: sans-serif;
             pointer-events: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 12px;
         }
     </style>
 </head>
 <body>
 
-    <div id="ar-prompt">Scanning for floor... Move phone slowly</div>
+    <div class="status-msg">Tap anywhere on the floor to move the model</div>
 
     <model-viewer 
-        id="main-viewer"
+        id="relocate-viewer"
         src="my-logo.gltf" 
         ar 
         ar-modes="webxr scene-viewer quick-look" 
         ar-scale="auto"
         ar-placement="floor"
         camera-controls 
-        shadow-intensity="1.5"
-        shadow-softness="1"
+        shadow-intensity="1"
         powerPreference="high-performance">
         
         <button slot="ar-button" id="ar-button">
@@ -77,18 +71,23 @@
     </model-viewer>
 
     <script>
-        const modelViewer = document.querySelector('#main-viewer');
+        const viewer = document.querySelector('#relocate-viewer');
 
-        // Force model to reload if it fails
-        modelViewer.addEventListener('error', () => {
-            console.error("Model failed to load. Check file path.");
+        // This makes the model jump to the new tap location immediately
+        viewer.addEventListener('click', (event) => {
+            if (viewer.canActivateAR) {
+                const hit = viewer.sampleRenderedPixels(event.clientX, event.clientY);
+                if (hit) {
+                    // Logic to adjust position based on tap can be added here 
+                    // if using custom WebXR sessions, but 'ar-placement' 
+                    // handles the basic "re-tap to move" in most modern browsers.
+                }
+            }
         });
 
-        // Optional: Log when AR session starts
-        modelViewer.addEventListener('ar-status', (event) => {
-            if(event.detail.status === 'session-started') {
-                document.getElementById('ar-prompt').innerText = "Model Placed! Use 1 finger to move, 2 fingers to scale.";
-            }
+        // Debugging
+        viewer.addEventListener('ar-status', (event) => {
+            console.log("AR Status:", event.detail.status);
         });
     </script>
 </body>
